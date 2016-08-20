@@ -51,7 +51,7 @@ Within each interval, the risk of the event may be zero at some covariate values
 For each covariate \code{x}, the algorithm will try to identify a threshold \code{c} 
 such that all events (in any given interval) occur when \code{x < c} (\code{x > c}).
 A zero risk will be automatically fitted above (below) the threshold, using an offset of \kbd{-100}
-on the log-hazard.
+on the log-hazard. 
 
 This type of model can be utilized to obtain a nonparametric maximum likelihood estimator 
 of a conditional distribution, achieving the flexibility of nonparametric estimators

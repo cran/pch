@@ -56,7 +56,8 @@ pchreg <- function(formula, breaks, data, weights, splinex = NULL){
 
 	Hy <- predF.pch(fit, x, y)
 	Hz <- (if(type == "counting") predF.pch(fit,x,z)[,"Haz"] else 0)
-	logLik <- sum(d*log(Hy[,"haz"]), na.rm = TRUE) - sum(Hy[,"Haz"] - Hz)
+  l1 <- log(Hy[,"haz"]); l1[l1 == -Inf] <- NA
+	logLik <- sum(d*l1, na.rm = TRUE) - sum(Hy[,"Haz"] - Hz)
 	# note: 'haz' can be 0, I set 0*log(0) = 0.
 	attr(logLik, "df") <- sum(fit$beta != 0)
 	
@@ -195,12 +196,12 @@ CumSum <- function(x){
 
 
 makebreaks <- function(y,d,x, breaks){
-  
+
 	n <- length(y)
-	n1 <- sum(d)
 	q <- ncol(x)
 	r <- range(y)
-	y <- y[d == 1]
+	n1 <- sum(d)
+	y1 <- y[d == 1]
 	
 	if(missing(breaks)){breaks <- max(5, min(50, ceiling(n1/q/5)))}
 
@@ -214,20 +215,29 @@ makebreaks <- function(y,d,x, breaks){
 	}
 	else{
 		k <- breaks
-		breaks <- quantile(y, (0:k)/k)
+		breaks <- quantile(y1, (0:k)/k)
+		check.l <- (mean(y < breaks[1]) > 0.03)
+		check.r <- (mean(y > breaks[k + 1]) > 0.03)
+		if(k > 2 && (check.l | check.r)){ # "many" censored data on the left or right tail
+			if(check.l & !check.r){breaks <- c(-Inf, quantile(y1, (0:(k - 1))/(k - 1)))}
+			if(!check.l & check.r){breaks <- c(quantile(y1, (0:(k - 1))/(k - 1)), Inf)}
+			if(check.l & check.r){breaks <- c(-Inf, quantile(y1, (0:(k - 2))/(k - 2)), Inf)}
+		}
 		breaks[1] <- r[1]; breaks[k + 1] <- r[2]
-		a <- duplicated(breaks)
+
+		a <- duplicated(round(breaks,8))
 		if(any(a)){
 			for(j in which(a)){
 				if(a[j - 1]){breaks[j] <- NA}
 				else{
-					h <- abs(y - breaks[j])
+					h <- abs(y1 - breaks[j])
 					h <- min(h[h > 0])
-					h <- min(h/2, (r[2] - r[1])/n/100)
+					h <- max(1e-6, min(h/2, (r[2] - r[1])/n/100))
 					breaks[j-1] <- breaks[j-1] - h
 					breaks[j] <- breaks[j] + h
 				}
 			}
+
 			breaks <- breaks[!is.na(breaks)]
 			k <- length(breaks)
 			h <- c(Inf, breaks[2:k] - breaks[1:(k - 1)])
@@ -236,8 +246,13 @@ makebreaks <- function(y,d,x, breaks){
 			k <- length(breaks) - 1
 		}
 	}
-	breaks[1] <- breaks[1] - (breaks[2] - breaks[1])/n1
+
+	# ensure no obs on the breaks
+	eps <- min(breaks[2:(k + 1)] - breaks[1:k])/n1
+	breaks[1:k] <- breaks[1:k] - eps
+	breaks[k + 1] <- breaks[k + 1] + eps
 	names(breaks) <- NULL
+
 	list(breaks = breaks, k = k)	
 }
 
@@ -336,7 +351,7 @@ poisfit <- function(d,x,w,off){
 			beta <- rep(NA, ncol(x))
 			beta[const] <- -Inf
 			names(beta) <- cn
-			return(list(beta = beta, vcov = 0))
+			return(list(beta = beta, vcov = 0, r = cbind(rep(-Inf, ncol(x)), Inf), converged = TRUE))
 		}
 		else{stop("zero-risk can not be fitted unless an intercept is included")}
 	}
@@ -345,15 +360,19 @@ poisfit <- function(d,x,w,off){
 
 	r <- myapply(x[d == 1,, drop = FALSE], range)
 	delta <- r[,2] - r[,1]
-	r[,1] <- r[,1] - 0.1*delta
-	r[,2] <- r[,2] + 0.1*delta
+	r[,1] <- r[,1] - 0.2*delta
+	r[,2] <- r[,2] + 0.2*delta
 	zeror <- rep.int(FALSE, length(d))
 	for(j in 1:ncol(x)){
 		out.l <- (x[,j] < r[j,1])
 		out.r <- (x[,j] > r[j,2])
-		if(mean(out.l) > mean(out.r)){outx <- out.l; r[j,2] <- Inf}
-		else{outx <- out.r; r[j,1] <- -Inf}
-		zeror <- (zeror | outx)
+    ml <- mean(out.l); mr <- mean(out.r)
+    if(max(ml,mr) < 0.05){r[j,1] <- -Inf; r[j,2] <- Inf}
+		else{
+      if(ml > mr){outx <- out.l; r[j,2] <- Inf}
+		  else{outx <- out.r; r[j,1] <- -Inf}
+		  zeror <- (zeror | outx)
+		}
 	}
 	x <- x*(!zeror)
 

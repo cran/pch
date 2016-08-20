@@ -2,8 +2,8 @@ Package: pch
 Type: Package
 Title: Piecewise Constant Hazards Models for Censored and Truncated
         Data
-Version: 1.1
-Date: 2016-02-18
+Version: 1.2
+Date: 2016-08-19
 Author: Paolo Frumento
 Maintainer: Paolo Frumento <paolo.frumento@ki.se>
 Description: Using piecewise constant hazards models is a very flexible approach
@@ -12,8 +12,8 @@ Description: Using piecewise constant hazards models is a very flexible approach
 Depends: survival
 Imports: stats
 License: GPL-2
-RoxygenNote: 5.0.0
+RoxygenNote: 5.0.1
 NeedsCompilation: no
-Packaged: 2016-02-18 10:04:55 UTC; paofru
+Packaged: 2016-08-19 19:55:15 UTC; paofru
 Repository: CRAN
-Date/Publication: 2016-02-18 15:38:17
+Date/Publication: 2016-08-20 10:31:38
