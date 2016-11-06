@@ -17,10 +17,22 @@ pchreg <- function(formula, breaks, data, weights, splinex = NULL){
 	mf <- eval(mf, parent.frame())
 	mt <- attr(mf, "terms")
 	
+	if(any((w <- model.weights(mf)) < 0)){stop("negative 'weights'")}
+	if(is.null(w)){w <- rep.int(1, nrow(mf)); alarm <- FALSE}
+	else{
+	  alarm <- (weights == 0)
+	  sel <- which(!alarm)
+	  mf <- mf[sel,]
+	  w <- w[sel]
+	  w <- w/mean(w)
+	}
+	if(any(alarm)){warning("observations with null weight will be dropped", call. = FALSE)}
+	if((n <- nrow(mf)) == 0){stop("zero non-NA cases", call. = FALSE)}
+	
 	if(!survival::is.Surv(zyd <- model.response(mf)))
 		{stop("the model response must be created with Surv()")}
-	if((n <- nrow(zyd)) == 0){stop("zero non-NA cases")}
 	type <- attributes(zyd)$type
+	zyd <- cbind(zyd)
 	if(type == "right"){y <- zyd[,1]; z <- rep.int(-Inf,n); d <- zyd[,2]}
 	else if(type == "counting"){z <- zyd[,1]; y <- zyd[,2]; d <- zyd[,3]}
 	else{stop("only type = 'right' and type = 'counting' are supported")}
@@ -31,8 +43,6 @@ pchreg <- function(formula, breaks, data, weights, splinex = NULL){
 	  x <- build.splinex(x, splinex$method, splinex$df, splinex$degree, splinex$v)
 	  ax <- attributes(x)
 	 }
-	w <- model.weights(mf)
-	if(is.null(w)){w <- rep.int(1,n)}
 
 	###
 
@@ -57,7 +67,7 @@ pchreg <- function(formula, breaks, data, weights, splinex = NULL){
 	Hy <- predF.pch(fit, x, y)
 	Hz <- (if(type == "counting") predF.pch(fit,x,z)[,"Haz"] else 0)
   l1 <- log(Hy[,"haz"]); l1[l1 == -Inf] <- NA
-	logLik <- sum(d*l1, na.rm = TRUE) - sum(Hy[,"Haz"] - Hz)
+	logLik <- sum(d*l1*w, na.rm = TRUE) - sum(w*(Hy[,"Haz"] - Hz))
 	# note: 'haz' can be 0, I set 0*log(0) = 0.
 	attr(logLik, "df") <- sum(fit$beta != 0)
 	
@@ -248,11 +258,14 @@ makebreaks <- function(y,d,x, breaks){
 	}
 
 	# ensure no obs on the breaks
-	eps <- min(breaks[2:(k + 1)] - breaks[1:k])/n1
-	breaks[1:k] <- breaks[1:k] - eps
-	breaks[k + 1] <- breaks[k + 1] + eps
+	
+	if(any(y %in% breaks)){
+	  eps <- min(breaks[2:(k + 1)] - breaks[1:k])/n1
+	  breaks[1:k] <- breaks[1:k] - eps
+	  breaks[k + 1] <- breaks[k + 1] + eps
+	}
+	
 	names(breaks) <- NULL
-
 	list(breaks = breaks, k = k)	
 }
 
@@ -315,7 +328,7 @@ pois.newton <- function(start, f, tol = 1e-5, maxit = 200, safeit = 0, ...){
 
 pois.loglik <- function(beta,d,x,w,off, zeror, deriv = 0){
 
-	log.lambda <- x%*%cbind(beta) - zeror*1e+10
+	log.lambda <- tcrossprod(x, t(beta)) - zeror*1e+10
 	lambda <- exp(log.lambda)
 	a <- lambda*off
 	l <- sum(w*(d*log.lambda - a))
@@ -324,11 +337,13 @@ pois.loglik <- function(beta,d,x,w,off, zeror, deriv = 0){
 	s <- x*c(w*(d - a))
 	if(deriv == 1){return(s)}
 
-	s <- colSums(s)
-	h <- -t(x*(c(w*a)))%*%x
+	s <- .colSums(s, nrow(s), ncol(s))
+	h <- -crossprod(x*(c(w*a)), x)
+
 	out <- -l
 	attr(out, "gradient") <- -s
 	attr(out, "hessian") <- -h 
+	
 	out
 }
 
@@ -411,6 +426,7 @@ poisfit <- function(d,x,w,off){
 	if(int){beta0[const] <- max(-10, log(mean(d[!zeror])))}
 	safeit <- 0; fit.ok <- FALSE; count <- 0
 	while(!fit.ok){
+
 	  fit <- pois.newton(beta0, pois.loglik, tol = 1e-5, maxit = 10*(1 + q), safeit = safeit,
 	                     d = d, x = x, w = w, off = off, zeror = zeror)
 

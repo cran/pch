@@ -1,12 +1,9 @@
-pch 1.2
+pch 1.3
 =============
 
-User-level changes
-------------------
-* the default choice of **breaks** has been improved.
-* handling of zero-risk regions has been modified.
-
-Internal changes
+Bugs fixed
 --------------------
-* bugs fixed
+* the log-likelihood was not weighted
+* handling null weights
+
  

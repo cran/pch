@@ -1,7 +1,7 @@
-fafffaebb17073c0a67ed9910a7c22fd *DESCRIPTION
+41dfad767cf314d929c2af39b6c37e8b *DESCRIPTION
 4092cf88100ca6910fd9e9f4589ad292 *NAMESPACE
-e18f1b773f4d4d8dd0ef31953dd7e44c *NEWS.md
-f9d890159ab61c2f99997fe5673741b6 *R/pch.R
+078f01fe2119a04014ff3762f09550be *NEWS.md
+9d8e69f602fb6d4c7a80491e520d22d6 *R/pch.R
 d2d63bd78bacc51d678c8cb718b7d70b *man/pch-internal.Rd
 c96a88f6e4d166cdbfea7a5c5b1febb3 *man/pchreg.Rd
 af3ae1c9ab62db8da35e825a4de162d4 *man/predict.pch.Rd
