@@ -62,7 +62,7 @@ If \code{type = "sim"}, a vector of simulated data.
 The presence of \code{NA} values will always cause the prediction to be \code{NA}.
 }
 \author{
-Paolo Frumento <paolo.frumento@ki.se>
+Paolo Frumento <paolo.frumento@unipi.it>
 }
 \seealso{
 \code{\link{pchreg}}

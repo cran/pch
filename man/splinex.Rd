@@ -50,7 +50,7 @@ The function returns its arguments, to be passed to an internal function \code{b
 that actually computes the design matrix.
 }
 \author{
-Paolo Frumento <paolo.frumento@ki.se>
+Paolo Frumento <paolo.frumento@unipi.it>
 }
 \note{
   A multidimensional spline can be created by including a term like, for example

@@ -1,9 +1,9 @@
-pch 1.3
+pch 1.4
 =============
 
 Bugs fixed
 --------------------
-* the log-likelihood was not weighted
-* handling null weights
+* Replaced class(obj) == "try-error" with inherits(obj, "try-error")
+* updated my e-mail address
 
  

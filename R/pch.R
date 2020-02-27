@@ -66,7 +66,7 @@ pchreg <- function(formula, breaks, data, weights, splinex = NULL){
 
 	Hy <- predF.pch(fit, x, y)
 	Hz <- (if(type == "counting") predF.pch(fit,x,z)[,"Haz"] else 0)
-  l1 <- log(Hy[,"haz"]); l1[l1 == -Inf] <- NA
+	l1 <- log(Hy[,"haz"]); l1[l1 == -Inf] <- NA
 	logLik <- sum(d*l1*w, na.rm = TRUE) - sum(w*(Hy[,"Haz"] - Hz))
 	# note: 'haz' can be 0, I set 0*log(0) = 0.
 	attr(logLik, "df") <- sum(fit$beta != 0)
@@ -289,7 +289,7 @@ pois.newton <- function(start, f, tol = 1e-5, maxit = 200, safeit = 0, ...){
 		
 	  	if(i > safeit){
 		  	H1 <- try(chol(h), silent = TRUE)
-		  	if(class(H1) != "try-error"){
+		  	if(!(inherits(H1, "try-error"))){
 		  		if(alg == "gs"){alg <- "nr"; eps <- 1}
 		  		delta <- chol2inv(H1)%*%g
 		  	}
@@ -308,7 +308,8 @@ pois.newton <- function(start, f, tol = 1e-5, maxit = 200, safeit = 0, ...){
 			if(max(abs(delta*eps)) < tol){conv <- TRUE; break}
 			f1 <- try(f(new.start, ..., deriv = 0), silent = TRUE)
 			eps <- eps*0.5
-			if(class(f1) == "try-error" || is.na(f1)){f1 <- Inf}
+			
+			if(inherits(f1, "try-error") || is.na(f1)){f1 <- Inf}
 		}
 
 		if(conv | f0 - f1 < tol){break}
@@ -381,10 +382,10 @@ poisfit <- function(d,x,w,off){
 	for(j in 1:ncol(x)){
 		out.l <- (x[,j] < r[j,1])
 		out.r <- (x[,j] > r[j,2])
-    ml <- mean(out.l); mr <- mean(out.r)
-    if(max(ml,mr) < 0.05){r[j,1] <- -Inf; r[j,2] <- Inf}
+		ml <- mean(out.l); mr <- mean(out.r)
+		if(max(ml,mr) < 0.05){r[j,1] <- -Inf; r[j,2] <- Inf}
 		else{
-      if(ml > mr){outx <- out.l; r[j,2] <- Inf}
+		  if(ml > mr){outx <- out.l; r[j,2] <- Inf}
 		  else{outx <- out.r; r[j,1] <- -Inf}
 		  zeror <- (zeror | outx)
 		}
@@ -450,7 +451,7 @@ poisfit <- function(d,x,w,off){
 	V <- 0*h
 	sel <- 1:ncol(h)
 	v <- try(chol2inv(chol(h)), silent = TRUE)
-	while(class(v) == "try-error"){
+	while(inherits(v, "try-error")){
 	  qrh <- qr(h[sel,sel,drop = FALSE])
 	  sel <- sel[qrh$pivot[1:qrh$rank]]
 	  v <- try(chol2inv(chol(h[sel,sel, drop = FALSE])), silent = TRUE)

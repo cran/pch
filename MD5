@@ -1,8 +1,8 @@
-41dfad767cf314d929c2af39b6c37e8b *DESCRIPTION
-4092cf88100ca6910fd9e9f4589ad292 *NAMESPACE
-078f01fe2119a04014ff3762f09550be *NEWS.md
-9d8e69f602fb6d4c7a80491e520d22d6 *R/pch.R
+b4a36f7c18d9140968c627427ab0c4e4 *DESCRIPTION
+16000777321cf0ac97ac1c30831ecc12 *NAMESPACE
+cd11ac7872cf314fad432b15dd12576a *NEWS.md
+e747ae1e64e93fc2620b4f7594b4eb81 *R/pch.R
 d2d63bd78bacc51d678c8cb718b7d70b *man/pch-internal.Rd
-c96a88f6e4d166cdbfea7a5c5b1febb3 *man/pchreg.Rd
-af3ae1c9ab62db8da35e825a4de162d4 *man/predict.pch.Rd
-2766ae9be4668a16ea319955ace396c0 *man/splinex.Rd
+2e8dabc6cf39153778f8fa0a3818af4f *man/pchreg.Rd
+9e311f4c2800d11f854b41d541537d37 *man/predict.pch.Rd
+2bd09a9bd23c6e5617b333ff5c1ef1f0 *man/splinex.Rd

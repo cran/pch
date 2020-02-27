@@ -95,7 +95,7 @@ Geman, S., and Hwang, C.R. (1982). Nonparametric Maximum Likelihood Estimation b
 The Annals of Statistics,10(2), 401-414. 
 }
 \author{
-Paolo Frumento <paolo.frumento@ki.se>
+Paolo Frumento <paolo.frumento@unipi.it>
 }
 \seealso{
 \code{\link{predict.pch}}, \code{\link{splinex}}
