@@ -8,11 +8,19 @@ Functions for internal use only.
 CumSum(x)
 myapply(x,fun)
 
-makebreaks(y, d, x, breaks)
-pois.newton(start, f, tol = 1e-5, maxit = 200, safeit = 0, \ldots)
+makebreaks.ct(y, d, x, w, breaks)
+makebreaks.ic(y, d, x, w, breaks)
+
 pois.loglik(beta,d,x,w,off, zeror, deriv = 0)
-poisfit(d,x,w,off)
-pch.fit(z, y, d, x, w, breaks)
+icpch.loglik(beta, y, x,w,U1,U2, zeror, deriv = 0, final = FALSE)
+convert.Surv(y)
+break.y(y, breaks)
+
+pois.fit(d,x,w,off)
+pch.fit.ct(z, y, d, x, w, breaks)
+pch.fit.ic(z, y, d, x, w, breaks)
+
+newton(start, f, tol = 1e-5, maxit = 200, safeit = 0, \ldots)
 
 cleanlambda(lambda,x,rangex)
 predF.pch(obj, x, y)

@@ -1,7 +1,7 @@
 \name{predict.pch}
 \alias{predict.pch}
 \title{
-Prediction from Fitted Piecewise Constant Hazards Models
+Prediction from Fitted Piecewise Constant Hazard Models
 }
 \description{
 This function returns predictions for an object of class \dQuote{\code{pch}}, usually the result of a call
@@ -19,13 +19,14 @@ to \code{\link{pchreg}}.
 a character string (just the first letter can be used) indicating the type of prediction. See \sQuote{Details}.
 }
   \item{newdata}{
-optional data frame in which to look for variables with which to predict. It must include all the covariates that enter the model and, if \code{type = 'distr'}, also the time variable. If omitted, the original data are used.
+optional data frame in which to look for variables with which to predict. It must include all the covariates that enter the model and, if \code{type = 'distr'}, also the time variable (see \sQuote{Details} for additional information of interval-censored data). 
+If \code{newdata} is omitted, the original data will be used.
 }
   \item{p}{
 vector of quantiles, to be specified if \code{type = "quantile"}.
 }
   \item{sim.method}{
-a character string (just the first letter can be used) indicating the simulation method if \code{type = "sim"}.
+a character string (just the first letter can be used) indicating the simulation method if \code{type = "sim"}. Only \code{sim.method = 'quantile'} is valid with interval-censored data.
 }
   \item{\dots}{
 for future methods.
@@ -34,7 +35,7 @@ for future methods.
 \details{
 If \code{type = "distr"} (the default), this function returns a data frame with columns \code{(haz, Haz, Surv, f)}
 containing the fitted values of the hazard function, the cumulative hazard, the survival function, and 
-the probability density function, respectively.
+the probability density function, respectively. 
 
 If \code{type = "quantile"}, a data frame with the fitted quantiles (corresponding to the supplied 
 values of \code{p}) is returned.
@@ -43,15 +44,13 @@ If \code{type = "sim"}, new data are simulated from the fitted model. Two method
 with \code{sim.method = "quantile"}, data are simulated by applying the estimated quantile function
 to a vector of random uniform numbers; if \code{sim.method = "sample"}, the quantile function is only used to identify the time interval, and the data are resampled from the observed values in the interval.
 The second method only works properly if there is a large number of breaks. However, it is less sensitive to
-model misspecification and facilitates sampling from distributions with a probability mass or non compact support.
+model misspecification and facilitates sampling from distributions with a probability mass or non compact support. This method is not applicable to interval-censored data.
 
-If the data are censored, some high quantiles may not be estimated: beyond the last observable quantile,
-all types of predictions (including \code{type = "sim"} with \code{sim.method = "sample"}) are
-computed assuming that the hazard remains constant after the last interval.
-
-Predictions are computed at \code{newdata}, if supplied. In the current implementation, \code{newdata} 
-must include all the variables that are needed for the prediction. Note that if \code{type = "distr"},
-new values of the responde variable are also required.
+Predictions are computed at \code{newdata}, if supplied. Note that \code{newdata} 
+must include all the variables that are needed for the prediction, and that if \code{type = "distr"},
+new values of the response variable are also required. If the data are interval-censored between \code{time1}
+and \code{time2}, these will \emph{not} be used as time-to-events and \code{newdata} must include
+a variable \code{'time'} at which to compute predictions.
 
 }
 \value{
@@ -59,10 +58,15 @@ If \code{type = "distr"}, a 4-columns data frame with columns \code{(haz, Haz, S
 If \code{type = "quantile"}, a named data frame with a column for each value of \code{p}.
 If \code{type = "sim"}, a vector of simulated data.
 
-The presence of \code{NA} values will always cause the prediction to be \code{NA}.
+The presence of missing values in the response or the covariates will always cause the prediction to be \code{NA}.
 }
 \author{
 Paolo Frumento <paolo.frumento@unipi.it>
+}
+\note{
+If the data are right-censored, some high quantiles may not be estimated: beyond the last observable quantile,
+all types of predictions (including \code{type = "sim"} with \code{sim.method = "sample"}) are
+computed assuming that the hazard remains constant after the last interval.
 }
 \seealso{
 \code{\link{pchreg}}
@@ -75,9 +79,9 @@ Paolo Frumento <paolo.frumento@unipi.it>
   
   n <- 1000
   x <- runif(n)
-  time <- rnorm(n, 1 + x, 1 + x)
-  cens <- rnorm(n,2,2)
-  y <- pmin(time,cens) # censored variable
+  time <- rnorm(n, 1 + x, 1 + x) # time-to-event
+  cens <- rnorm(n,2,2) # censoring variable
+  y <- pmin(time,cens) # observed variable
   d <- (time <= cens) # indicator of the event
   model <- pchreg(Surv(y,d) ~ x, breaks = 20)
 

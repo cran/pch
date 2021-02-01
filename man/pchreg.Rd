@@ -1,16 +1,12 @@
 \name{pchreg}
 \alias{pchreg}
 \title{
-Piecewise Constant Hazards Models
+Piecewise Constant Hazard Models
 }
 \description{
-This function estimates piecewise exponential models on right-censored, left-truncated data. 
-The effect of covariates, and not just the baseline hazard, 
-varies across intervals. Moreover, a special handling of zero-risk regions is implemented.
-Differently
-from the \code{phreg} function available in the \pkg{eha} package,
-this function is mainly intended to be used as a nonparametric
-maximum likelihood estimator.
+This function estimates piecewise exponential models on right-censored, left-truncated, or interval-censored data.
+The function is mainly intended for prediction and, unlike the \code{phreg} function available in the \pkg{eha} package, 
+it allows the effect of covariates, and not just the baseline hazard, to depend on time.
 }
 \usage{
 pchreg(formula, breaks, data, weights, splinex = NULL)
@@ -21,49 +17,44 @@ pchreg(formula, breaks, data, weights, splinex = NULL)
 The response must be a \kbd{Surv} object as returned by \code{\link{Surv}} (see \sQuote{Details}).
 }
   \item{breaks}{
-either a numeric vector of two or more unique cut points or a single number (greater than or equal to 1) 
-giving the number of intervals into which the time variable is to be cut. If missing, the number of intervals 
-is set to \code{max(5, min(50, ceiling(n1/q/5)))}, where \code{n1} is the number of events, and \code{q} is the
-number of predictors.
+either a numeric vector of two or more unique cut points, or a single number 
+giving the number of intervals. If missing, the number and position of the \kbd{breaks}
+are determined automatically.
 }
   \item{data}{
 an optional data frame containing the variables in the model.
 }
   \item{weights}{
-an optional vector of weights to be used in the fitting process.
+an optional vector of weights to be used in the fitting process. 
+The weights will be normalized to sum to the sample size. 
+This implies that, for example, using double weights will not halve the standard errors.
 }
   \item{splinex}{
 either \code{NULL}, or an object created with \code{\link{splinex}} (see \sQuote{Details}). 
 }
 }
 \details{
-The left side of \kbd{formula} must be of the form \kbd{Surv(time, event)} if the data are right-censored, and \kbd{Surv(time0, time, event)} if the data are right-censored and left-truncated (\kbd{time0 < time}). Using \kbd{Surv(time)} is also allowed and indicates that the data are neither censored nor truncated.
-Note that the response variable (and thus the \code{breaks}) can be negative.
+The left side of the \kbd{formula} must be specified as \kbd{Surv(time, event)}, for right-censored data; 
+\kbd{Surv(time0, time, event)}, for right-censored and left-truncated data 
+(\kbd{time0 < time}, \code{time0} can be \kbd{-Inf});
+and \kbd{Surv(time1, time2, type = "interval2")} for interval-censored data (use \kbd{time1 = time2} 
+for exact observations, \kbd{time1 = -Inf} or \kbd{NA} for left-censored, and \kbd{time2 = Inf} or \kbd{NA} 
+for right-censored). Using \kbd{Surv(time)} is also allowed and indicates that the data are neither censored 
+nor truncated. Note that the response variable (and thus the \code{breaks}) can be negative.
 
 To fit the model, the time interval is first divided in sub-intervals as defined by \code{breaks}.
-When the location of \code{breaks} is not specified, the empirical quantiles of \code{time[event == 1]}
-are used as cut points. If there is a probability mass, this may result in two or more \code{breaks}
-being equal: in this case, an interval that only includes the mass point is created automatically.
-
-A different costant hazard (exponential) model is then fitted in each sub-interval, using Poisson 
-regression to model the log-hazard as a linear function of covariates.
-Within each interval, the risk of the event may be zero at some covariate values.
-For each covariate \code{x}, the algorithm will try to identify a threshold \code{c} 
-such that all events (in any given interval) occur when \code{x < c} (\code{x > c}).
-A zero risk will be automatically fitted above (below) the threshold, using an offset of \kbd{-100}
-on the log-hazard. 
+When the location of \code{breaks} is not specified, the empirical quantiles are used as cut points.
+A different costant hazard (exponential) model is then fitted in each sub-interval, modeling 
+the log-hazard as a linear function of covariates.
+The special function \code{\link{splinex}} can be used to build flexible models.
 
 This type of model can be utilized to obtain a nonparametric maximum likelihood estimator 
 of a conditional distribution, achieving the flexibility of nonparametric estimators
 while keeping the model parametric in practice. Users unfamiliar with this approach
-are recommended reading Geman and Hwang (1982) for an overview, and the paper by Ackerberg, Chen and Hahn (2012) describing how this approach can be applied to simplify inference in two-step semiparametric models.
+are recommended to read Geman and Hwang (1982) for an overview, and the paper by Ackerberg, Chen and Hahn (2012) 
+describing how this approach can be applied to simplify inference in two-step semiparametric models.
 
-The number of parameters is equal to the number of intervals, multiplied by the number of
-covariates. Both quantities are usually supposed to increase with the sample size.
-The special function \code{splinex} is a handy tool that facilitates implementing
-the linear predictor. When \code{splinex} is not \code{NULL}, each column of 
-the original design matrix (as defined by \code{formula}) is automatically replaced with 
-the corresponding spline basis. See the documentation of \code{\link{splinex}} for details.
+
 }
 \value{
 An object of class \dQuote{\code{pch}}, which is a list with the following items:
@@ -80,7 +71,7 @@ An object of class \dQuote{\code{pch}}, which is a list with the following items
 \item{conv.status}{a code indicating the convergence status. It takes value \kbd{0} if the
 algorithm has converged successfully; \kbd{1} if convergence has not been achieved; 
 and \kbd{2} if, although convergence has been achieved, more than 1\% of observations
-have an associated survival numerically equal to zero, indicating that the solution is not
+have an associated survival numerically equal to zero, indicating that the solution may not be
 well-behaved or the model is misspecified.}
 
 The accessor functions \code{summary}, \code{coef}, \code{predict}, \code{nobs}, \code{logLik}, \code{AIC}, \code{BIC} can be used to extract information from the fitted model.
@@ -94,6 +85,21 @@ Friedman, M. (1982). Piecewise Exponential Models for Survival Data with Covaria
 Geman, S., and Hwang, C.R. (1982). Nonparametric Maximum Likelihood Estimation by the Method of Sieves.
 The Annals of Statistics,10(2), 401-414. 
 }
+\note{
+NOTE1. Right-censoring is a special case of interval censoring, in which exact events are identified by
+\code{time2 = time1}, while censored observations have \code{time2 = Inf}.
+Note, however, that \code{pchreg} will \emph{not} use the same routines for right-censored
+and interval-censored data, implying that
+\code{pchreg(Surv(time1, time2, type = "interval2") ~ x)}
+may not be identical to \code{pchreg(Surv(time = time1, event = (time2 < Inf)) ~ x)}.
+The latter is usually faster and slightly more accurate.
+
+NOTE2. Within each interval, the risk of the event may be zero at some covariate values.
+For each covariate \code{x}, the algorithm will try to identify a threshold \code{c} 
+such that all events (in any given interval) occur when \code{x < c} (\code{x > c}).
+A zero risk will be automatically fitted above (below) the threshold, using an offset of \kbd{-100}
+on the log-hazard. 
+}
 \author{
 Paolo Frumento <paolo.frumento@unipi.it>
 }
@@ -102,18 +108,56 @@ Paolo Frumento <paolo.frumento@unipi.it>
 }
 \examples{
 
-  # using simulated data
+  # Simulate right-censored data
   
   n <- 1000
-  x <- runif(n)
-  time <- rnorm(n, 1 + x, 1 + x)
-  cens <- rnorm(n,2,2)
-  y <- pmin(time,cens) # censored variable
+  x <- runif(n) # a covariate
+  time <- rexp(n, exp(1 + x)) # time-to-event
+  cens <- runif(n,0,2) # censoring event
+  y <- pmin(time,cens) # observed variable
   d <- (time <= cens) # indicator of the event
+  model <- pchreg(Surv(y,d) ~ x, breaks = 10)
 
-  model <- pchreg(Surv(y,d) ~ x, breaks = 20)
 
-  # see the documentation of predict.pch
+
+
+  # Simulate right-censored, left-truncated data
+  
+  n <- 1000
+  x <- runif(n) # a covariate
+  time0 <- rexp(n, 10) # time at enrollment
+  time <- rexp(n, exp(1 + x)) # time-to-event
+  cens <- runif(n,0,2) # censoring event
+  
+  # y,d,x are only observed if (y > time0)
+  y <- pmin(time,cens)
+  d <- (time <= cens)
+  u <- (y > time0)
+  y <- y[u]
+  d <- d[u]
+  x <- x[u]
+  z <- time0[u]
+  model <- pchreg(Surv(z,y,d) ~ x, breaks = 10)
+
+
+
+
+  # Simulate interval-censored data
+  
+  n <- 1000
+  x <- runif(n) # a covariate
+  time <- 10*rexp(n, exp(1 + x)) # time-to-event
+  time1 <- floor(time)
+  time2 <- ceiling(time)
+  # Individuals are observed at discrete times
+  # I observe (time1,time2) such that time1 <= time <= time2
+  model <- pchreg(Surv(time1,time2, type = "interval2") ~ x, breaks = 10)
+  
+  
+  
+  
+  # Try summary(model), predict(model)
+  # See the documentation of predict.pch for more examples
 }
 \keyword{survival}
 \keyword{models}

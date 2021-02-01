@@ -1,9 +1,12 @@
-pch 1.4
+pch 2.0
 =============
 
-Bugs fixed
---------------------
-* Replaced class(obj) == "try-error" with inherits(obj, "try-error")
-* updated my e-mail address
-
- 
+* added functions for interval-censored data
+* sandwitch covariance matrix
+* slightly different convergence criterion
+* renamed some internal functions, modified the documentation
+* pchreg returns an object with double class
+* added contrast to predict
+* fixed potential problem with all.vars
+* used Hmisc:::wtd.quantile in makebreaks
+* fixed uncountable bugs

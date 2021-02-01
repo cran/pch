@@ -1,7 +1,7 @@
 \name{splinex}
 \alias{splinex}
 \title{
-Including Interactions and Splines in Piecewise Constant Hazard Regression
+Including Splines in Piecewise Constant Hazard Regression
 }
 \description{
 This function can be used within a call to \code{\link{pchreg}} to automatically include 
@@ -40,10 +40,10 @@ By letting \code{splinex = splinex(\ldots)}, each column of the original design 
 is automatically replaced by the corresponding spline basis, defined by \code{method}, 
 \code{df}, and \code{degree}.
 
-This modeling approach has the drawback of generating a potentially large design matrix:
-to reduce its dimension, you can choose \code{v < 1}. In this case, only the principal 
-components explaining at least a proportion \code{v} of the variance
-are used to fit the model (see \dQuote{Examples}).
+This modeling approach has the drawback of generating a potentially large design matrix.
+To reduce its dimension, select \code{v < 1}. With this option, the original design matrix
+will be converted into principal components, and only the PCs explaining at least a proportion 
+\code{v} of the variance will be used to fit the model (see \dQuote{Examples}).
 }
 \value{
 The function returns its arguments, to be passed to an internal function \code{build.splinex}
@@ -53,7 +53,7 @@ that actually computes the design matrix.
 Paolo Frumento <paolo.frumento@unipi.it>
 }
 \note{
-  A multidimensional spline can be created by including a term like, for example
+  A multidimensional spline can be created by including a tensor product of splines, e.g., 
   \code{ns(x1,df)*ns(x2,df)}. This is not supported by \command{splinex},
   as it may generate a very large design matrix.
 }
@@ -84,9 +84,9 @@ Paolo Frumento <paolo.frumento@unipi.it>
 
   trueF <- pexp(t, exp(-abs(x1 - x2)))
   par(mfrow = c(2,2))
-  plot(trueF, 1 - predict(model1)$Surv); abline(0,1, col = "red") # does not fit
-  plot(trueF, 1 - predict(model2)$Surv); abline(0,1, col = "red") # neither
-  plot(trueF, 1 - predict(model3)$Surv); abline(0,1, col = "red") # great!
-  plot(trueF, 1 - predict(model4)$Surv); abline(0,1, col = "red") # almost as good
+  plot(trueF, 1 - predict(model1)$Surv); abline(0,1, col = "red", lwd = 2) # does not fit
+  plot(trueF, 1 - predict(model2)$Surv); abline(0,1, col = "red", lwd = 2) # neither
+  plot(trueF, 1 - predict(model3)$Surv); abline(0,1, col = "red", lwd = 2) # great!
+  plot(trueF, 1 - predict(model4)$Surv); abline(0,1, col = "red", lwd = 2) # almost as good
 }
 \keyword{regression}
