@@ -1,8 +1,42 @@
 \name{internals}
 \alias{internals}
+
+\alias{CumSum}
+\alias{myapply}
+
+\alias{makebreaks.ct}
+\alias{makebreaks.ic}
+
+\alias{pois.loglik}
+\alias{icpch.loglik}
+\alias{convert.Surv}
+\alias{break.y}
+
+\alias{pois.fit}
+\alias{pch.fit.ct}
+\alias{pch.fit.ic}
+
+\alias{newton}
+
+\alias{cleanlambda}
+\alias{predF.pch}
+\alias{predQ.pch}
+\alias{sim.pch}
+
+\alias{build.splinex}
+\alias{predict.splinex}
+
+\alias{logLik.pch}
+\alias{nobs.pch}
+\alias{vcov.pch}
+\alias{coef.pch}
+\alias{print.pch}
+\alias{summary.pch}
+\alias{print.summary.pch}
+
 \title{Internal Functions}
 \description{
-Functions for internal use only.
+Functions for internal use only and S3 methods.
 }
 \usage{
 CumSum(x)
