@@ -14,7 +14,7 @@ pchreg(formula, breaks, data, weights, splinex = NULL)
 \arguments{
   \item{formula}{
  an object of class \dQuote{\code{\link{formula}}}: a symbolic description of the regression model. 
-The response must be a \kbd{Surv} object as returned by \code{\link{Surv}} (see \sQuote{Details}).
+The response must be a \kbd{Surv} object as returned by \code{\link[survival]{Surv}} (see \sQuote{Details}).
 }
   \item{breaks}{
 either a numeric vector of two or more unique cut points, or a single number 
